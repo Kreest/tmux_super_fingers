@@ -1,5 +1,6 @@
 import curses
 from abc import ABCMeta, abstractmethod
+from typing import Any
 
 
 class UI(metaclass=ABCMeta):  # pragma: no cover
@@ -47,7 +48,7 @@ class CursesUI(UI):  # pragma: no cover
     @property
     def BLACK_ON_YELLOW(self) -> int: return curses.color_pair(2)
 
-    def __init__(self, window: curses.window):
+    def __init__(self, window: Any):
         # To inherit window background
         curses.use_default_colors()
         curses.curs_set(False)

@@ -18,7 +18,9 @@ class PanesRenderer:
     def __init__(self, ui: UI, panes: List[Pane]):
         self.ui = ui
         self.panes = panes
+        self.original_panes = panes
         self.secondary_mode = False
+        self.multi_mode = False
 
     def loop(self) -> None:
         user_input = ''
@@ -34,8 +36,11 @@ class PanesRenderer:
                         chosen_mark.perform_secondary_action()
                     else:
                         chosen_mark.perform_primary_action()
-
-                    break
+                    if self.multi_mode:
+                        user_input = ''
+                        panes = self.original_panes
+                    else:
+                        break
 
             for pane in panes:
                 self._render_pane_text(pane)
@@ -65,8 +70,16 @@ class PanesRenderer:
                 self.secondary_mode = True
 
             return user_input
+        elif char == ascii.TAB:
+            if self.multi_mode:
+                self.multi_mode = False
+            else:
+                self.multi_mode = True
+
+            return user_input
         else:
-            user_input += chr(char)
+            if ascii.isprint(char):
+                user_input += chr(char)
 
         return user_input
 

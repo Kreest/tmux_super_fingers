@@ -156,6 +156,116 @@ def test_second_space_turns_off_secondary_action_mode():
     assert mock_target.calls == [['default_primary_action']]
 
 
+def test_other_non_print_chars_dont_do_anything():
+    ui = MockUI(user_input=[ascii.CR, ascii.CR, ascii.ESC])
+    mock_target = MockTarget()
+
+    pane = create_pane({'text': 'line 1\nline 2'})
+    pane.marks = [Mark(
+        start=1,
+        text='ine',
+        target=mock_target,
+        hint='a'
+    )]
+    panes_renderer = PanesRenderer(ui, [pane])
+
+    panes_renderer.loop()
+
+    assert ui.calls == [
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', ascii.CR],
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', ascii.CR],
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', ascii.ESC]
+    ]
+    assert mock_target.calls == []
+
+
+def test_multi_mode():
+    ui = MockUI(user_input=[ascii.TAB, 97, 97, ascii.ESC])
+    mock_target = MockTarget()
+
+    pane = create_pane({'text': 'line 1\nline 2'})
+    pane.marks = [Mark(
+        start=1,
+        text='ine',
+        target=mock_target,
+        hint='a'
+    )]
+    panes_renderer = PanesRenderer(ui, [pane])
+
+    panes_renderer.loop()
+
+    assert ui.calls == [
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', ascii.TAB],
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', 97],
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', 97],
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', ascii.ESC]
+    ]
+    assert mock_target.calls == [['default_primary_action'], ['default_primary_action']]
+
+
+def test_multi_mode_second_tab_exits():
+    ui = MockUI(user_input=[ascii.TAB, ascii.TAB, 97])
+    mock_target = MockTarget()
+
+    pane = create_pane({'text': 'line 1\nline 2'})
+    pane.marks = [Mark(
+        start=1,
+        text='ine',
+        target=mock_target,
+        hint='a'
+    )]
+    panes_renderer = PanesRenderer(ui, [pane])
+
+    panes_renderer.loop()
+
+    assert ui.calls == [
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', ascii.TAB],
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', ascii.TAB],
+        ['render_line', 0, 0, 'line 1', 102],
+        ['render_line', 1, 0, 'line 2', 102],
+        ['render_line', 0, 1, 'ine', 101],
+        ['render_line', 0, 1, 'a', 103],
+        ['getch', 97],
+    ]
+    assert mock_target.calls == [['default_primary_action']]
+
+
 def test_hides_marks_that_dont_match_user_input():
     ui = MockUI(user_input=[49, ascii.ESC])
     mock_target = MockTarget()
